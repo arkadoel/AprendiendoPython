@@ -1,4 +1,4 @@
-__author__ = 'fer'
+#para ejecutarlo 'python3 ./__init__.py'
 import sys
 from PyQt4 import QtGui, QtCore
 
