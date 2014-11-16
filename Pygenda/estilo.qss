@@ -1,0 +1,42 @@
+QFrame#myFrame
+{
+    background: rgba(38,50,56,95%);
+    border-style: outset;
+    border-width: 4px;
+    border-radius: 10px;
+    border-color: beige;
+}
+QPushButton#btnCerrar
+{
+    background-color: darkred;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 10px;
+    border-color: beige;
+    font: bold 16px;
+    color: white ;
+    width: 2px;
+    padding: 1px;
+}
+QLabel
+{
+    padding-left: 10px;
+    color: white;
+    font: bold 14px;
+}
+
+QLineEdit
+{
+    text-align: center;
+    height: 25px;
+    font: 16px 'Courier';
+}
+
+QListWidget
+{
+    font: bold 14px 'Arial';
+}
+QListWidget:Item
+{
+    padding: 3px;
+}
