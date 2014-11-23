@@ -1,9 +1,12 @@
 QFrame#myFrame
 {
-    background: rgba(38,50,56,95%);
-    border-style: outset;
+    /*
+    background: rgba(30,20,30,80%);
     border-width: 4px;
     border-radius: 10px;
+    */
+    border-style: outset;
+    background: #546e7a;
     border-color: beige;
 }
 QPushButton#btnCerrar
@@ -18,14 +21,36 @@ QPushButton#btnCerrar
     width: 2px;
     padding: 1px;
 }
+QPushButton
+{
+    background-color: gainsboro;
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: beige;
+    font: bold 16px;
+    color: black ;
+    padding: 5px;
+}
+
 QLabel
 {
     padding-left: 10px;
-    color: white;
+    color: Gainsboro;
     font: bold 14px;
 }
 
 QLineEdit
+{
+    text-align: center;
+    height: 25px;
+    font: 16px 'Courier';
+    border-style: outset;
+    border-width: 2px;
+    border-radius: 5px;
+    border-color: Gray;
+}
+QComboBox
 {
     text-align: center;
     height: 25px;

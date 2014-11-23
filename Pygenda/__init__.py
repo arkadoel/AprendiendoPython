@@ -1,3 +1,6 @@
+__author__ = "https://github.com/arkadoel"
+__version__ = "0.1.2"
+
 """
     Aplicacion para llevar una agenda telefonica
 """
