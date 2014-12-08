@@ -18,7 +18,7 @@ class ProcesoReloj:
     def parar(self):
         self.daemon._stop()
 
-    def proceso(self):
+    def proceso(self, alerta=None):
         '''
         metodo a poner en un nuevo hilo
         :return:

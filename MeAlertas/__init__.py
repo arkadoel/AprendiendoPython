@@ -11,23 +11,26 @@ Que es lo que se quiere aprender con este desarrollo:
 '''
 
 from PyQt4 import QtGui
-from Ventana1 import vPrincipal
 from Constantes import const
 import sys
-from datos.TablaAlerta import tbAlertas, Alerta
-import datetime
+from datos.TablaAlerta import tbAlertas
+
 import Reloj2
 import IconoSistema
 
 if __name__ == '__main__':
-    '''
+
     app = QtGui.QApplication(sys.argv)
-    v = vPrincipal()
-    v.show()
+    print('Iniciado ' + const.getHora())
+    tabla = tbAlertas()
+    tareas = tabla.listarHorasAlertasHoy()
+
+    IconoSistema.IconoSistema(app)
+    hilo = Reloj2.MirarHora(kwargs=tareas, args='0', daemon=True)
+
+    hilo.start()
 
     sys.exit(app.exec_())
-    '''
-
 
     '''
     tabla = tbAlertas()
@@ -49,25 +52,6 @@ if __name__ == '__main__':
 
 
     for key, value in tareas.items():
-
         tabla.eliminar(key)
+
     '''
-
-    IconoSistema.iconoSistema()
-
-    print('Iniciado')
-    tabla = tbAlertas()
-    tareas = tabla.listarHorasAlertasHoy()
-    hilo = Reloj2.MirarHora(kwargs=tareas,args='0', daemon=False)
-
-    hilo.start()
-    hilo.join()
-
-
-
-
-
-
-
-
-

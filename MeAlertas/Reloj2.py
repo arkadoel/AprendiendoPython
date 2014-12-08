@@ -1,9 +1,14 @@
 __author__ = 'Arkadoel'
-import  threading
+import threading
 import time
 from Constantes import const
 import sys, os
-import winsound
+
+try:
+    import winsound
+except:
+    print('Sistema no windows, no se encuentra la libreria winSound')
+
 
 class MirarHora(threading.Thread):
 
@@ -27,34 +32,45 @@ class MirarHora(threading.Thread):
 
     def run(self):
         print('Argumentos pasados al demonio: ', self.kwargs)
-
+        seguir = True
         #obtener lista de tareas para hoy
         self.listaTareas = self.kwargs
 
 
-        while True:
+        while seguir:
+            if self.listaTareas.__len__() == 0:
+                seguir = False
+            else:
+                horaActual = const.getHora()
 
-            horaActual = const.getHora()
-            for key, value in self.listaTareas.items():
-                if horaActual == value[0]:
-                    print('toca sonar', value[0])
-                    self.hacerProcesos()
-                else:
-                    print('.', end=' ')
+                for key, value in self.listaTareas.items():
+                    if horaActual == value[0]:
+                        print('toca sonar', value[0])
+                        self.hacerProcesos(value[1])
+                    else:
+                        print('.', end=' ')
 
-            #hereda el error de no limpiar el buffer del lenguaje C --> LOL
-            sys.stdout.flush()
+                #hereda el error de no limpiar el buffer del lenguaje C --> LOL
+                sys.stdout.flush()
 
-            time.sleep(self.__ESPERA__)
+                time.sleep(self.__ESPERA__)
+
+        print('Finalizado el daemon reloj')
 
 
-    def hacerProcesos(self):
+    def hacerProcesos(self, texto=None):
         '''
         Lanza los eventos que haya que hacer en ese momento
         :return:
         '''
+
+        const.SYSTRAY.showMessage(texto)
+
         if os.name == 'nt': #windows
-            winsound.PlaySound('./Alarm02.wav', winsound.SND_FILENAME)
+            winsound.PlaySound(const.SONIDO, winsound.SND_FILENAME)
+        elif os.name== 'posix': #linux
+            comando = 'aplay ' + const.SONIDO
+            os.system(comando)
 
 
 

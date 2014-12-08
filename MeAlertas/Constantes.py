@@ -1,9 +1,14 @@
 __author__ = 'Arkadoel'
 from _datetime import  datetime
+import threading
 
 class const:
-    __APP_VERSION__ = '0.0.1'
-    __DB_PATH__ = "./mealertas.db"
+    APP_VERSION = '0.0.1'
+    DB_PATH = "./mealertas.db"
+    SONIDO = './media/Alarm02.wav'
+    ICONO = './media/LOGO.png'
+    SYSTRAY = None
+    v_PRINCIPAL=None
 
 
     @staticmethod

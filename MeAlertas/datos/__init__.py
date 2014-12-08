@@ -12,7 +12,7 @@ class db:
     def conectar(self):
         try:
 
-            self.conexion = sqlite3.connect(const.__DB_PATH__)
+            self.conexion = sqlite3.connect(const.DB_PATH)
 
             #para evitar errores TypeError: tuple indices must be integers, not str
             self.conexion.row_factory = sqlite3.Row # its key
