@@ -10,6 +10,7 @@ class ventana(QtGui.QWidget):
         self.setWindowTitle('PyCalculadora')
         self.setWindowIcon(QtGui.QIcon('calcIcon.png'))
         self.setFixedSize(250, 200)
+		#QtGui.QApplication.setStyle(QtGui.QStyleFactory.create("CleanLooks"))
 
         self.opAnterior=0
 
