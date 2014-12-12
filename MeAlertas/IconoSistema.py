@@ -6,7 +6,7 @@ from Ventana1 import vPrincipal
 from Constantes import const
 
 class IconoSistema():
-    SEG_MENSAJE = 5
+    SEG_MENSAJE = 5 #segundos que permanecerá visible el mensaje
 
     def __init__(self, parent=None):
         self.daemon = threading.Thread(target=self.iniciar(parent), name='DemonioReloj')
@@ -47,3 +47,4 @@ class IconoSistema():
 
     def verVentanaAlertas(self):
         const.v_PRINCIPAL = vPrincipal()
+        #const.v_PRINCIPAL = ventana()

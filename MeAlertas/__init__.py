@@ -18,6 +18,10 @@ from datos.TablaAlerta import tbAlertas
 import Reloj2
 import IconoSistema
 
+@staticmethod
+def Salir():
+    sys.exit(0)
+
 if __name__ == '__main__':
 
     app = QtGui.QApplication(sys.argv)
@@ -30,7 +34,8 @@ if __name__ == '__main__':
 
     hilo.start()
 
-    sys.exit(app.exec_())
+    app.exec_()
+
 
     '''
     tabla = tbAlertas()
