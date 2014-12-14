@@ -1,0 +1,23 @@
+QDialog
+{
+        background-color: #c9c9a9;
+}
+QLabel, QCheckBox, QPushButton, QListWidget
+{
+    font: bold 16px 'Arial';
+    text-align: center;
+}
+QLineEdit
+{
+        font: bold 16px 'Arial';
+        text-align: center;
+}
+QTextEdit
+{
+        font: 14px 'Arial';
+        text-align: center;
+}
+QVBoxLayout#vboxHoras
+{
+        text-align: center;
+}

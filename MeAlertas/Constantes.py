@@ -3,10 +3,14 @@ from _datetime import  datetime
 import threading
 
 class const:
-    APP_VERSION = '0.0.1'
+    APP_VERSION = '0.1.0'
     DB_PATH = "./mealertas.db"
     SONIDO = './media/Alarm02.wav'
     ICONO = './media/LOGO.png'
+    ICONO_NUEVO = './media/new.png'
+    ICONO_GUARDAR = './media/save.png'
+    ICONO_ELIMINAR = './media/delete.png'
+    ICONO_LISTA = './media/bullets-black.png'
     SYSTRAY = None
     v_PRINCIPAL=None
 

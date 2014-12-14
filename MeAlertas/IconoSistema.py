@@ -16,6 +16,7 @@ class IconoSistema():
     def iniciar(self, parent):
         self.icon = QtGui.QIcon(const.ICONO)
         self.iconoSalir = QtGui.QIcon.fromTheme("exit")
+        self.iconoLista = QtGui.QIcon(const.ICONO_LISTA)
         self.tray = QtGui.QSystemTrayIcon(parent=parent)
         self.tray.setIcon(self.icon)
 
@@ -25,12 +26,16 @@ class IconoSistema():
 
     def agregarMenu(self):
         menu = QtGui.QMenu()
-        verAlertasAction= menu.addAction(self.icon, "&Ver Alertas")
+        ultimaAlertaAction = menu.addAction(self.icon, 'Ver &Ultima alerta')
+        verAlertasAction= menu.addAction(self.iconoLista, "&Ver Alertas")
         menu.addSeparator()
         exitAction = menu.addAction(self.iconoSalir, "&Salir")
 
         exitAction.triggered.connect(QCoreApplication.instance().quit)
         verAlertasAction.triggered.connect(lambda: self.verVentanaAlertas())
+        ultimaAlertaAction.triggered.connect(lambda: self.verUltimaAlerta())
+
+        self.tray.activated.connect(self.onTrayIconActivated)
 
         self.tray.setVisible(True)
 
@@ -38,9 +43,16 @@ class IconoSistema():
         self.showMessage('Aplicacion iniciada')
         const.SYSTRAY = self
 
-    def showMessage(self, mensaje):
+    def onTrayIconActivated(self, reason):
+        if reason == QtGui.QSystemTrayIcon.Trigger:
+            #ignorar
+            pass
+        elif reason == QtGui.QSystemTrayIcon.DoubleClick:
+            self.verVentanaAlertas()
 
-        self.tray.showMessage('MeAlertas ' + const.APP_VERSION,
+    def showMessage(self,hora=None, mensaje=None):
+        self.ultimaAlerta = (hora, mensaje)
+        self.tray.showMessage(hora,
                               mensaje,
                               QtGui.QSystemTrayIcon.Information,
                               self.SEG_MENSAJE * 1000)
@@ -48,3 +60,8 @@ class IconoSistema():
     def verVentanaAlertas(self):
         const.v_PRINCIPAL = vPrincipal()
         #const.v_PRINCIPAL = ventana()
+
+    def verUltimaAlerta(self):
+        hora = self.ultimaAlerta[0]
+        mensaje = self.ultimaAlerta[1]
+        self.showMessage(hora, mensaje)

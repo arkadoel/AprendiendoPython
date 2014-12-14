@@ -3,6 +3,7 @@ import threading
 import time
 from Constantes import const
 import sys, os
+from datos.TablaAlerta import tbAlertas
 
 try:
     import winsound
@@ -12,7 +13,8 @@ except:
 
 class MirarHora(threading.Thread):
 
-    __ESPERA__ = 5 # segundos de espera entre iteracciones
+    ESPERA = 10     #segundos de espera entre iteracciones
+    PASADAS = 1     #recarga el listado de tareas cada X pasadas de reloj
 
     def __init__(self, target=None, group=None, name=None, verbose=None, args=None, kwargs=None, daemon=None):
         '''
@@ -28,6 +30,7 @@ class MirarHora(threading.Thread):
         threading.Thread.__init__(self, group=group, target=target,name=name, daemon=daemon)
         self.args = args
         self.kwargs = kwargs
+        self.alertaActual = None
         return
 
     def run(self):
@@ -35,36 +38,48 @@ class MirarHora(threading.Thread):
         seguir = True
         #obtener lista de tareas para hoy
         self.listaTareas = self.kwargs
-
+        i=0
 
         while seguir:
-            if self.listaTareas.__len__() == 0:
-                seguir = False
-            else:
-                horaActual = const.getHora()
+            if i>self.PASADAS:
+                self.listaTareas = tbAlertas().listarHorasAlertasHoy()
 
-                for key, value in self.listaTareas.items():
-                    if horaActual == value[0]:
-                        print('toca sonar', value[0])
-                        self.hacerProcesos(value[1])
+
+            horaActual = const.getHora()
+
+            for key, value in self.listaTareas.items():
+                if horaActual == value[0]:
+                    print('toca sonar', value[0])
+                    if self.alertaActual is not None:
+                        if self.alertaActual != key:
+                            #la alerta no ha sido notificada, la hacemos sonar
+                            self.hacerProcesos(hora=value[0], texto=value[1])
+                        else:
+                            print('La alerta ya fue notificada, no sonara')
                     else:
-                        print('.', end=' ')
+                        self.hacerProcesos(hora=value[0], texto=value[1])
+                        self.alertaActual = key
+                else:
+                    print('.', end=' ')
 
-                #hereda el error de no limpiar el buffer del lenguaje C --> LOL
-                sys.stdout.flush()
+            #hereda el error de no limpiar el buffer del lenguaje C --> LOL
+            sys.stdout.flush()
 
-                time.sleep(self.__ESPERA__)
+            time.sleep(self.ESPERA)
+
+            i +=1
+        #finWhile
 
         print('Finalizado el daemon reloj')
 
 
-    def hacerProcesos(self, texto=None):
+    def hacerProcesos(self, hora=None, texto=None):
         '''
         Lanza los eventos que haya que hacer en ese momento
         :return:
         '''
 
-        const.SYSTRAY.showMessage(texto)
+        const.SYSTRAY.showMessage(hora, texto)
 
         if os.name == 'nt': #windows
             winsound.PlaySound(const.SONIDO, winsound.SND_FILENAME)

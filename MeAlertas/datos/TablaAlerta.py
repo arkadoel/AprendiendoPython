@@ -42,26 +42,54 @@ class tbAlertas:
                 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 '''
     __DELETE__ = 'delete from Alertas where id = ?;'
-    __UPDATE__ = ''
+    __UPDATE__ = '''
+                update Alertas set
+                hora = ?, mensaje=?, notificada=?,
+                lunes=?, martes=?, miercoles=?,
+                jueves=?,
+                viernes=?,
+                sabado=?,
+                domingo=?
+                where id = ?;
+                '''
     __SELECT__ = 'select * from Alertas'
 
     def __init__(self):
         self.gestorDB = datos.db()
 
     def agregar(self, alerta):
-        sql = self.__INSERT__
-        self.gestorDB.ejecutarSQL(sql, (
-            alerta.hora,
-            alerta.mensaje,
-            alerta.estaNotificada,
-            alerta.lunes,
-            alerta.martes,
-            alerta.miercoles,
-            alerta.jueves,
-            alerta.viernes,
-            alerta.sabado,
-            alerta.domingo
-        ))
+
+        existe = self.getAlertaById(alerta.id)
+
+        if existe is None:
+            sql = self.__INSERT__
+            self.gestorDB.ejecutarSQL(sql, (
+                alerta.hora,
+                alerta.mensaje,
+                alerta.estaNotificada,
+                alerta.lunes,
+                alerta.martes,
+                alerta.miercoles,
+                alerta.jueves,
+                alerta.viernes,
+                alerta.sabado,
+                alerta.domingo
+            ))
+        else:
+            sql = self.__UPDATE__
+            self.gestorDB.ejecutarSQL(sql, (
+                alerta.hora,
+                alerta.mensaje,
+                alerta.estaNotificada,
+                alerta.lunes,
+                alerta.martes,
+                alerta.miercoles,
+                alerta.jueves,
+                alerta.viernes,
+                alerta.sabado,
+                alerta.domingo,
+                alerta.id
+            ))
 
     def eliminar(self, id):
         sql = self.__DELETE__.replace('?', str(id))

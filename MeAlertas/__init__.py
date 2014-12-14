@@ -1,3 +1,5 @@
+from Ventana1 import vPrincipal
+
 __author__ = 'Arkadoel'
 __date__ = '6 dic 2014'
 '''
