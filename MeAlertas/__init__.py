@@ -1,4 +1,17 @@
-from Ventana1 import vPrincipal
+#!/usr/bin/env python3
+import sys
+
+if sys.version.__contains__('2.'):
+    print('Python 2.x, no se puede ejecutar, se necesita python3')
+elif sys.version.__contains__('3.'):
+    print('Python 3.x, correcto')
+    from PyQt4 import QtGui
+    from Constantes import const
+    from datos.TablaAlerta import tbAlertas
+    #from Ventana1 import vPrincipal
+
+    import Reloj2
+    import IconoSistema
 
 __author__ = 'Arkadoel'
 __date__ = '6 dic 2014'
@@ -12,31 +25,24 @@ Que es lo que se quiere aprender con este desarrollo:
     - Mas controles QT
 '''
 
-from PyQt4 import QtGui
-from Constantes import const
-import sys
-from datos.TablaAlerta import tbAlertas
-
-import Reloj2
-import IconoSistema
-
 @staticmethod
 def Salir():
     sys.exit(0)
 
 if __name__ == '__main__':
+    if sys.version.__contains__('3.'):
 
-    app = QtGui.QApplication(sys.argv)
-    print('Iniciado ' + const.getHora())
-    tabla = tbAlertas()
-    tareas = tabla.listarHorasAlertasHoy()
+        app = QtGui.QApplication(sys.argv)
+        print('Iniciado ' + const.getHora())
+        tabla = tbAlertas()
+        tareas = tabla.listarHorasAlertasHoy()
 
-    IconoSistema.IconoSistema(app)
-    hilo = Reloj2.MirarHora(kwargs=tareas, args='0', daemon=True)
+        IconoSistema.IconoSistema(app)
+        hilo = Reloj2.MirarHora(kwargs=tareas, args='0', daemon=True)
 
-    hilo.start()
+        hilo.start()
 
-    app.exec_()
+        app.exec_()
 
 
     '''

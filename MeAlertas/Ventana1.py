@@ -42,21 +42,24 @@ class vPrincipal(QtGui.QDialog):
         self.gridPropiedades.addWidget(self.lblHora, 0, 0)
         self.gridPropiedades.addWidget(self.txtHora, 0, 1)
 
-        self.gridPropiedades.addWidget(self.lblMensaje, 1,0, 1, 4)
-        self.gridPropiedades.addWidget(self.txtMensaje, 2,0, 1, 4)
+        self.gridPropiedades.addWidget(self.lblMensaje, 1, 0, 1, 4)
+        self.gridPropiedades.addWidget(self.txtMensaje, 2, 0, 1, 4)
 
-        self.gridPropiedades.addWidget(self.lblDiaSemana, 3, 1)
-        self.gridPropiedades.addWidget(self.chkLunes, 4, 1)
-        self.gridPropiedades.addWidget(self.chkMartes, 5, 1)
-        self.gridPropiedades.addWidget(self.chkMiercoles, 6, 1)
-        self.gridPropiedades.addWidget(self.chkJueves, 7, 1)
-        self.gridPropiedades.addWidget(self.chkViernes, 8, 1)
-        self.gridPropiedades.addWidget(self.chkSabado, 9, 1)
-        self.gridPropiedades.addWidget(self.chkDomingo, 10, 1)
+        self.gridPropiedades.addWidget(self.lblComando, 3, 0, 1, 4)
+        self.gridPropiedades.addWidget(self.txtComando, 4, 0, 1, 4)
 
-        self.gridPropiedades.addWidget(self.btnNuevo, 4, 3)
-        self.gridPropiedades.addWidget(self.btnGuardar, 5, 3)
-        self.gridPropiedades.addWidget(self.btnEliminar, 6, 3)
+        self.gridPropiedades.addWidget(self.lblDiaSemana, 4, 1)
+        self.gridPropiedades.addWidget(self.chkLunes, 5, 1)
+        self.gridPropiedades.addWidget(self.chkMartes, 6, 1)
+        self.gridPropiedades.addWidget(self.chkMiercoles, 7, 1)
+        self.gridPropiedades.addWidget(self.chkJueves, 8, 1)
+        self.gridPropiedades.addWidget(self.chkViernes, 9, 1)
+        self.gridPropiedades.addWidget(self.chkSabado, 10, 1)
+        self.gridPropiedades.addWidget(self.chkDomingo, 11, 1)
+
+        self.gridPropiedades.addWidget(self.btnNuevo, 5, 3)
+        self.gridPropiedades.addWidget(self.btnGuardar, 6, 3)
+        self.gridPropiedades.addWidget(self.btnEliminar, 7, 3)
 
         self.setLayout(self.gridFondo)
 
@@ -77,6 +80,8 @@ class vPrincipal(QtGui.QDialog):
         self.lblMensaje= QtGui.QLabel("Mensaje a mostrar: ", self)
         self.txtMensaje = QtGui.QTextEdit(self)
         self.txtMensaje.setFixedHeight(120)
+        self.lblComando = QtGui.QLabel('Comando a ejecutar', self)
+        self.txtComando = QtGui.QLineEdit(self)
 
         self.chkLunes = QtGui.QCheckBox('Lunes', self)
         self.chkMartes = QtGui.QCheckBox('Martes', self)
@@ -122,6 +127,7 @@ class vPrincipal(QtGui.QDialog):
         self.chkViernes.setChecked(False)
         self.chkSabado.setChecked(False)
         self.chkDomingo.setChecked(False)
+        self.txtComando.setText('')
         self.alertaActual = None
 
     def clickAccion(self, accion):
@@ -147,6 +153,7 @@ class vPrincipal(QtGui.QDialog):
                 alerta.id = self.alertaActual.id;
 
             alerta.hora = self.txtHora.text()
+            alerta.script = self.txtComando.text()
             alerta.mensaje = self.txtMensaje.toPlainText()
             alerta.lunes = self.chkLunes.isChecked()
             alerta.martes = self.chkMartes.isChecked()
@@ -179,6 +186,7 @@ class vPrincipal(QtGui.QDialog):
         self.chkViernes.setChecked(alerta.viernes)
         self.chkSabado.setChecked(alerta.sabado)
         self.chkDomingo.setChecked(alerta.domingo)
+        self.txtComando.setText(alerta.script)
 
     def initListaHoras(self):
         self.tabla = tbAlertas()

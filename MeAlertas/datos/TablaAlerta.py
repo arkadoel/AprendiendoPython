@@ -10,10 +10,11 @@ class Alerta:
     '''
     def __init__(self):
         self.id = -1
-        self.hora=''
-        self.mensaje=''
+        self.hora= ''
+        self.mensaje= ''
         self.estaNotificada = False
         self.iniciarDiasSemana()
+        self.script = ''
 
     def iniciar(self, _hora, _mensaje):
         self.estaNotificada = False
@@ -38,8 +39,8 @@ class tbAlertas:
 
     __INSERT__ = '''
                 insert into Alertas
-                (hora, mensaje, notificada, lunes, martes, miercoles, jueves, viernes, sabado, domingo)
-                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                (hora, mensaje, notificada, lunes, martes, miercoles, jueves, viernes, sabado, domingo, script)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 '''
     __DELETE__ = 'delete from Alertas where id = ?;'
     __UPDATE__ = '''
@@ -49,7 +50,8 @@ class tbAlertas:
                 jueves=?,
                 viernes=?,
                 sabado=?,
-                domingo=?
+                domingo=?,
+                script=?
                 where id = ?;
                 '''
     __SELECT__ = 'select * from Alertas'
@@ -73,7 +75,8 @@ class tbAlertas:
                 alerta.jueves,
                 alerta.viernes,
                 alerta.sabado,
-                alerta.domingo
+                alerta.domingo,
+                alerta.script
             ))
         else:
             sql = self.__UPDATE__
@@ -88,6 +91,7 @@ class tbAlertas:
                 alerta.viernes,
                 alerta.sabado,
                 alerta.domingo,
+                alerta.script,
                 alerta.id
             ))
 
@@ -114,6 +118,7 @@ class tbAlertas:
             alerta.viernes = fila['viernes']
             alerta.sabado = fila['sabado']
             alerta.domingo = fila['domingo']
+            alerta.script = fila['script']
             return alerta
 
     def listarHorasAlertas(self):
@@ -124,7 +129,7 @@ class tbAlertas:
         resultado.clear()
 
         for fila in filas:
-            resultado.update({int(fila['id']):(fila['hora'], fila['mensaje'])})
+            resultado.update({int(fila['id']):(fila['hora'], fila['mensaje'], fila['script'])})
 
         return resultado
 
@@ -137,7 +142,7 @@ class tbAlertas:
         resultado.clear()
 
         for fila in filas:
-            resultado.update({int(fila['id']):(fila['hora'], fila['mensaje'])})
+            resultado.update({int(fila['id']):(fila['hora'], fila['mensaje'], fila['script'])})
 
         return resultado
 
