@@ -1,9 +1,9 @@
 __author__ = 'Arkadoel'
-from _datetime import  datetime
+from _datetime import datetime
 import threading
 
 class const:
-    APP_VERSION = '0.1.0'
+    APP_VERSION = '0.1.1'
     DB_PATH = "./mealertas.db"
     SONIDO = './media/Alarm02.wav'
     ICONO = './media/LOGO.png'
@@ -12,7 +12,7 @@ class const:
     ICONO_ELIMINAR = './media/delete.png'
     ICONO_LISTA = './media/bullets-black.png'
     SYSTRAY = None
-    v_PRINCIPAL=None
+    v_PRINCIPAL = None
 
 
     @staticmethod
@@ -46,10 +46,10 @@ class const:
 
     def diaSemana() -> str:
         '''
-            Devuelve el dia de la semana en el que estamos
-            :rtype : basestring
-            :return: String
-            '''
+        Devuelve el dia de la semana en el que estamos
+        :rtype : basestring
+        :return: String
+        '''
         dias = ['Lunes',
                 'Martes',
                 'Miercoles',

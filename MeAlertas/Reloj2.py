@@ -83,9 +83,9 @@ class MirarHora(threading.Thread):
         const.SYSTRAY.showMessage(hora, texto)
 
         if comando is not None:
-            strEjecuta = 'sh ./ejecuta.sh ' + comando
+            strEjecuta = comando
             print(strEjecuta)
-            os.system(strEjecuta)
+            subprocess.call(strEjecuta, shell=True)
 
         #repetimos tres veces el sonido
         for i in range(0, 3):

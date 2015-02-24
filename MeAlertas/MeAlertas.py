@@ -15,6 +15,8 @@ elif sys.version.__contains__('3.'):
 
 __author__ = 'Arkadoel'
 __date__ = '6 dic 2014'
+__license__ = 'GPLv2'
+
 '''
 Aplicacion que permite poner recordatorios semanales a ciertas alertas
 en determinados dias de la semana. Mas o menos.
