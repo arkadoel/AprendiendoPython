@@ -1,0 +1,4 @@
+Nombre,Apellidos,Edad,Sexo,Casado,columna
+Fer,Minguela,29.0,hombre,False,32.3
+Paco,Cifuentes,32.0,hombre,True,32.3
+Pedro,Martinez,21.0,hombre,False,2.0
