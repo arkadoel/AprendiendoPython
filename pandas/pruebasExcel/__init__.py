@@ -47,6 +47,7 @@ def ver_menu():
         print('Del siguiente menu, seleccione la opcion deseada:')
         print('\t1.- Intentar leer datos')
         print('\t2.- Importar datos a base de datos')
+        print('\t3.- Mostrar datos de un dataframe')
         print('\r\n\t32.-Salir')
 
         opcion = input('\r\n\tOpcion: ')
@@ -55,10 +56,12 @@ def ver_menu():
             print("Inicio: " + getHora())
             Acciones(ruta = RUTA_EXCEL).intentar_leer_archivo()
             print("Fin: " + getHora())
-        if opcion == '2':
+        elif opcion == '2':
             print("Inicio: " + getHora())
             Acciones(ruta= RUTA_EXCEL).volcar_datos_a_db()
             print("Inicio: " + getHora())
+        elif opcion == '3':
+            Acciones(ruta = RUTA_EXCEL).prueba_recorrido_dataframe()
         elif opcion == '32':
             seguir = False
 

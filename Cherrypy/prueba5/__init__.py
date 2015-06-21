@@ -11,7 +11,7 @@ class webapp(object):
 
     @cherrypy.expose
     def index(self):
-        return  file('./index.html')
+        return open('./index.html')
 
 if __name__ == '__main__':
     w = webapp()

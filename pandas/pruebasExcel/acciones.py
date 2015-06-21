@@ -1,11 +1,15 @@
-""" Clase donde se definiran las distintas acciones a realizar
+"""
+    Clase donde se definiran las distintas acciones a realizar
 
 """
 import pandas as pd
+from pandas import ExcelWriter
+import xlsxwriter
 import numpy as np
 from pandas import Index
 import sqlite3
 from pandas.io import sql
+import matplotlib.pyplot as plt
 
 import pandas.io
 import sqlalchemy
@@ -71,9 +75,13 @@ class Acciones:
         cur = cnx.cursor()
         cur.execute("drop table if exists tabla")
         cnx.commit()
+
+        #la siguiente linea es usando pypandas para guardar
         #df2[0:3].to_sql(name='tabla', con=cnx)
 
+        #otra forma de hacerlo
         sql.write_frame(df2, name='tabla', con=cnx)
+
         print('Importados ', len(df2), ' registros')
         cnx.commit()
         cnx.close()
@@ -81,8 +89,13 @@ class Acciones:
         print('Base de datos creada con exito')
 
     def df2sqlite(self, dataframe, tbl_name = 'tb'):
-
-
+        """
+        Codigo que permite escribir un dataframe usando sentencias
+        de sqlite estandar sin framework ni usando pypandas casi
+        :param dataframe:
+        :param tbl_name:
+        :return:
+        """
         conn=sqlite3.connect(self.rutaDB)
         cur = conn.cursor()
 
@@ -98,3 +111,25 @@ class Acciones:
 
         conn.commit()
         conn.close()
+
+    def prueba_recorrido_dataframe(self):
+        """
+        Consiste en intentar recorrer y mostrar el contenido de un
+        dataframe
+        """
+        df = self.obtener_dataframe()
+        df.reset_index()
+
+        print(df.head(6))
+
+        #ahora vamos a coger la tercera fila
+        print('Mostrar datos de la tercera fila\r\n', df.iloc[3])
+
+        print('\r\nDatos de fila tres y columna dos: ', df.iloc[3,2])
+        df2 = df['Fecha']
+        df2 = df2.combine_first(df['Neto'])
+
+        print(df2.tail(5))
+        #writer = pd.ExcelWriter('sale.xlsx')
+
+        #df2.to_excel(writer, 'Salida')
