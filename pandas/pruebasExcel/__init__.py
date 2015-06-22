@@ -1,4 +1,6 @@
 from acciones import Acciones
+from Escrituras import EscribirExcel
+
 from _datetime import datetime
 __author__ = 'arkadoel'
 __date__ = '2015-jun-16'
@@ -48,6 +50,7 @@ def ver_menu():
         print('\t1.- Intentar leer datos')
         print('\t2.- Importar datos a base de datos')
         print('\t3.- Mostrar datos de un dataframe')
+        print('\t4.- Escribir un xlsx con pypandas')
         print('\r\n\t32.-Salir')
 
         opcion = input('\r\n\tOpcion: ')
@@ -62,6 +65,12 @@ def ver_menu():
             print("Inicio: " + getHora())
         elif opcion == '3':
             Acciones(ruta = RUTA_EXCEL).prueba_recorrido_dataframe()
+        elif opcion == '4':
+            escribir = EscribirExcel(entrada=RUTA_EXCEL, salida="./salida.xlsx")
+            escribir.crear_un_libro_pandas_Excel_Writer()
+            escribir.crear_libro_xlwt()
+            escribir.crear_libro_openpyxl()
+            escribir.modificar_con_openpyxl()
         elif opcion == '32':
             seguir = False
 
