@@ -19,7 +19,7 @@ class Win(tk.Frame):
         self.theme_btns()
 
         self.s = ttk.Style()
-        self.s.theme_use('alt')
+        self.s.theme_use('clam')
 
         self.colors = ['red', 'green', 'blue', 'orange', 'white']
 
