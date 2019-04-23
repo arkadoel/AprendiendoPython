@@ -27,26 +27,118 @@ Python Regius es un futuro IDE para python
 '''
 
 import gi
+import os
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '3.0')
 gi.require_version('GtkSpell', '3.0')
 gi.require_version('Pango', '1.0')
 from gi.repository.Pango import FontDescription
-from gi.repository import Gtk, Pango, GtkSource
-from gi.repository.GtkSource import LanguageManager, DrawSpacesFlags
+from gi.repository import Gtk, Pango, GtkSource, Gdk
+from gi.repository.GtkSource import LanguageManager, DrawSpacesFlags, StyleSchemeManager
 
-EXAMPLE_TEXT = """import gi
-gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+EXAMPLE_TEXT = """
+#fragmento de codigo de ejemplo
+import threading
+import time
+from Constantes import const
+import sys, os, subprocess
+from datos.TablaAlerta import tbAlertas
 
-def main():
-    win = Gtk.Window()
-    win.connect("destroy", Gtk.main_quit)
-    win.show_all()
-    Gtk.main()
+try:
+    import winsound
+except:
+    print('Sistema no windows, no se encuentra la libreria winSound')
 
-if __name__ == '__main__':
-    main()
+
+class MirarHora(threading.Thread):
+
+    ESPERA = 10     #segundos de espera entre iteracciones
+    PASADAS = 1     #recarga el listado de tareas cada X pasadas de reloj
+
+    def __init__(self, target=None, group=None, name=None, verbose=None, args=None, kwargs=None, daemon=None):
+        '''
+        Inicializacion del hilo, por si queremos pasarle datos
+        :param target:
+        :param group:
+        :param name:
+        :param verbose:
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        threading.Thread.__init__(self, group=group, target=target,name=name, daemon=daemon)
+        self.args = args
+        self.kwargs = kwargs
+        self.alertaActual = None
+        return
+
+    def run(self):
+        print('Argumentos pasados al demonio: ', self.kwargs)
+        seguir = True
+        #obtener lista de tareas para hoy
+        self.listaTareas = self.kwargs
+        i=0
+
+        while seguir:
+            if i>self.PASADAS:
+                self.listaTareas = tbAlertas().listarHorasAlertasHoy()
+                self.alertaActual = None
+
+
+            horaActual = const.getHora()
+
+            for key, value in self.listaTareas.items():
+                if horaActual == value[0]:
+                    print('toca sonar', value[0])
+                    if self.alertaActual is not None:
+                        if self.alertaActual != key:
+                            #la alerta no ha sido notificada, la hacemos sonar
+                            self.hacerProcesos(hora=value[0], texto=value[1], comando=value[2])
+                        else:
+                            print('La alerta ya fue notificada, no sonara')
+                    else:
+                        self.hacerProcesos(hora=value[0], texto=value[1], comando=value[2])
+                        self.alertaActual = key
+                else:
+                    print('.', end=' ')
+
+            #hereda el error de no limpiar el buffer del lenguaje C --> LOL
+            sys.stdout.flush()
+
+            time.sleep(self.ESPERA)
+
+            i +=1
+        #finWhile
+
+        print('Finalizado el daemon reloj')
+
+
+    def hacerProcesos(self, hora=None, texto=None, comando=None):
+        '''
+        Lanza los eventos que haya que hacer en ese momento
+        :return:
+        '''
+
+        const.SYSTRAY.showMessage(hora, texto)
+
+        if comando is not None:
+            strEjecuta = comando
+            print(strEjecuta)
+            subprocess.call(strEjecuta, shell=True)
+
+        #repetimos tres veces el sonido
+        for i in range(0, 3):
+
+            if os.name == 'nt':
+                #windows
+                winsound.PlaySound(const.SONIDO, winsound.SND_FILENAME)
+            elif os.name== 'posix':
+                #linux
+                comando = 'aplay ' + const.SONIDO
+                os.system(comando)
+
+
+
 """
 
 class MainWindow(Gtk.Window):
@@ -77,6 +169,7 @@ class MainWindow(Gtk.Window):
         self.grid = Gtk.Grid()
         self.add(self.grid)
 
+        self.generate_toolbar()
         self.generate_textview()
 
     def set_white_chars(self, white_chars):
@@ -122,19 +215,27 @@ class MainWindow(Gtk.Window):
         self.grid.attach(scrolledwindow, 0, 1, 3, 1)
 
         self.textview = GtkSource.View()
-        self.textview.override_font(FontDescription.from_string('Monospace'))
+        self.font = FontDescription.from_string('Monospace')
+        self.font.set_size(10*1000)
+        self.textview.override_font(self.font)
         self.textview.set_show_line_numbers(True)
         self.textview.set_auto_indent(True)
         self.textview.set_tab_width(4)
         #self.textview.set_show_right_margin(True) #muy python
         self.textview.set_highlight_current_line(True)
-        self.set_text_wrapping(True)
+        self.set_text_wrapping(False)
         #self.set_white_chars(True) #pone los puntos en los espacios
 
         self.textbuffer = self.textview.get_buffer()
         self.textbuffer.new_with_language(self.LANGS['.%s' % 'py'])
         self.textbuffer.set_text(EXAMPLE_TEXT)
         self.do_file_type('.py')
+        #/usr/share/gtksourceview-3.0/styles/
+        #mas temas en https://wiki.gnome.org/Projects/GtkSourceView/StyleSchemes
+        style_scheme = GtkSource.StyleSchemeManager.get_default().get_scheme('oblivion')
+        style_scheme = GtkSource.StyleSchemeManager.get_default().get_scheme('tango')
+        self.textbuffer.set_style_scheme(style_scheme)
+
         scrolledwindow.add(self.textview)
 
         self.tag_bold = self.textbuffer.create_tag("bold",
@@ -145,6 +246,105 @@ class MainWindow(Gtk.Window):
             underline=Pango.Underline.SINGLE)
         self.tag_found = self.textbuffer.create_tag("found",
             background="yellow")
+
+        #scroll zoom raton
+        self.textview.connect('scroll-event', self.on_scroll)
+
+    def generate_toolbar(self):
+        toolbar = Gtk.Toolbar()
+        self.grid.attach(toolbar, 0, 0, 3, 1)
+
+        btnNew  = Gtk.ToolButton()
+        btnNew.set_icon_name("document-new")
+        btnOpen = Gtk.ToolButton()
+        btnOpen.set_icon_name("folder-open")
+        btnSave = Gtk.ToolButton()
+        btnSave.set_icon_name("media-floppy")
+        btnUndo = Gtk.ToolButton()
+        btnUndo.set_icon_name("edit-undo")
+        btnRedo = Gtk.ToolButton()
+        btnRedo.set_icon_name("edit-redo")
+        btnZoomIn = Gtk.ToolButton()
+        btnZoomIn.set_icon_name("zoom-in")
+        btnZoomOut = Gtk.ToolButton()
+        btnZoomOut.set_icon_name("zoom-out")
+
+        toolbar.insert(btnNew, 1)
+        toolbar.insert(btnOpen, 2)
+        toolbar.insert(btnSave, 3)
+        toolbar.insert(Gtk.SeparatorToolItem(), 4)
+        toolbar.insert(btnUndo, 5)
+        toolbar.insert(btnRedo, 6)
+        toolbar.insert(Gtk.SeparatorToolItem(), 7)
+        toolbar.insert(btnZoomIn, 8)
+        toolbar.insert(btnZoomOut, 9)
+
+        btnZoomIn.connect("clicked", self.btnZoomIn_click)
+        btnZoomOut.connect("clicked", self.btnZoomOut_click)
+        btnOpen.connect("clicked", self.open_dialog_load_file)
+
+    def open_dialog_load_file(self, widget):
+
+        dialog = Gtk.FileChooserDialog("Open ...", None,
+                                       Gtk.FileChooserAction.OPEN,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            selected_file = dialog.get_filename()
+            print (selected_file)
+            self.Cargar_fichero(selected_file)
+        elif response == Gtk.ResponseType.CANCEL:
+            selected_file = ""
+        dialog.destroy()
+
+        return selected_file
+
+    def Cargar_fichero(self, selected_file):
+        filename, file_extension = os.path.splitext(selected_file)
+        texto = self.Read_file_to_end(selected_file)
+        self.textbuffer = self.textview.get_buffer()
+        self.textbuffer.new_with_language(self.LANGS['.%s' % 'py'])
+        self.textbuffer.set_text(texto)
+        self.do_file_type(file_extension)
+
+    def Read_file_to_end(self, ruta):
+        with open(ruta, 'r') as f:
+            texto = f.read()
+            f.close()
+        return texto
+
+    def btnZoomIn_click(self, widget):
+        self.zoom_in()
+
+    def zoom_in(self):
+        print('zoom in ')
+        newSize = self.font.get_size() + (2*1000)
+        self.font.set_size(newSize)# if newSize < 99000 else 20000)
+        self.textview.override_font(self.font)
+
+    def btnZoomOut_click(self, widget):
+        self.zoom_out()
+
+    def zoom_out(self):
+        print('zoom out')
+        newSize = self.font.get_size() - (2*1000)
+        self.font.set_size(newSize if newSize>2000 else 3000)
+        self.textview.override_font(self.font)
+
+    def on_scroll(self, widget, event):
+        """ handles on scroll event"""
+        # Handles zoom in / zoom out on Ctrl+mouse wheel
+        accel_mask = Gtk.accelerator_get_default_mod_mask()
+        if event.state & accel_mask == Gdk.ModifierType.CONTROL_MASK:
+            direction = event.get_scroll_deltas()[2]
+            print(event.get_scroll_deltas())
+            if direction >0:  # scrolling down -> zoom out
+                self.zoom_out()
+            else:
+                self.zoom_in()
+
 
 if __name__ == '__main__':
     win = MainWindow()

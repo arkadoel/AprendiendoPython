@@ -300,7 +300,7 @@ class IconViewWindow(Gtk.Window):
 
         for icon in sorted(icons):
             try:
-                pixbuf = Gtk.IconTheme.get_default().load_icon(icon, 64, 0)
+                pixbuf = Gtk.IconTheme.get_default().load_icon(icon, 32, 0)
                 liststore.append([pixbuf, icon])
             except Exception as inst:
                 print(inst)
