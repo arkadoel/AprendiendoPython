@@ -158,6 +158,7 @@ class MainWindow(Gtk.Window):
     def __init__(self):
         super().__init__()
 
+        self.workingFile = None
         self.init_ui()
 
     def init_ui(self):
@@ -216,7 +217,7 @@ class MainWindow(Gtk.Window):
 
         self.textview = GtkSource.View()
         self.font = FontDescription.from_string('Monospace')
-        self.font.set_size(10*1000)
+        self.font.set_size(12*1000)
         self.textview.override_font(self.font)
         self.textview.set_show_line_numbers(True)
         self.textview.set_auto_indent(True)
@@ -233,7 +234,7 @@ class MainWindow(Gtk.Window):
         #/usr/share/gtksourceview-3.0/styles/
         #mas temas en https://wiki.gnome.org/Projects/GtkSourceView/StyleSchemes
         style_scheme = GtkSource.StyleSchemeManager.get_default().get_scheme('oblivion')
-        style_scheme = GtkSource.StyleSchemeManager.get_default().get_scheme('tango')
+        #style_scheme = GtkSource.StyleSchemeManager.get_default().get_scheme('tango')
         self.textbuffer.set_style_scheme(style_scheme)
 
         scrolledwindow.add(self.textview)
@@ -249,6 +250,7 @@ class MainWindow(Gtk.Window):
 
         #scroll zoom raton
         self.textview.connect('scroll-event', self.on_scroll)
+        self.connect("key-press-event", self.key_press_event)
 
     def generate_toolbar(self):
         toolbar = Gtk.Toolbar()
@@ -282,10 +284,31 @@ class MainWindow(Gtk.Window):
         btnZoomIn.connect("clicked", self.btnZoomIn_click)
         btnZoomOut.connect("clicked", self.btnZoomOut_click)
         btnOpen.connect("clicked", self.open_dialog_load_file)
+        btnSave.connect("clicked", self.save_dialog)
+        btnUndo.connect("clicked", self.btn_undo_click)
+        btnRedo.connect("clicked", self.btn_redo_click)
+
+    def key_press_event(self, widget, event):
+        keyval_name = Gdk.keyval_name(event.keyval)
+        ctrl = (event.state & Gdk.ModifierType.CONTROL_MASK)
+        if ctrl and keyval_name == 'y':
+            if self.textbuffer.can_redo():
+                self.textbuffer.do_redo(self.textbuffer)
+        elif ctrl and keyval_name == 'z':
+            if self.textbuffer.can_undo():
+                self.textbuffer.do_undo(self.textbuffer)
+
+    def btn_redo_click(self, widget):
+        if self.textbuffer.can_redo():
+            self.textbuffer.do_redo(self.textbuffer)
+
+    def btn_undo_click(self, widget):
+        if self.textbuffer.can_undo():
+            self.textbuffer.do_undo(self.textbuffer)
 
     def open_dialog_load_file(self, widget):
 
-        dialog = Gtk.FileChooserDialog("Open ...", None,
+        dialog = Gtk.FileChooserDialog("Abrir ...", None,
                                        Gtk.FileChooserAction.OPEN,
                                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                         Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
@@ -301,6 +324,68 @@ class MainWindow(Gtk.Window):
 
         return selected_file
 
+    def save_dialog(self, widget):
+        if(self.workingFile is None or self.workingFile == '' ):
+            dialog = Gtk.FileChooserDialog("Guardar ...", None,
+                                           Gtk.FileChooserAction.SAVE,
+                                           (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                            Gtk.STOCK_SAVE, Gtk.ResponseType.ACCEPT))
+
+            self.add_filters(dialog)
+            response = dialog.run()
+
+            Gtk.FileChooser.set_do_overwrite_confirmation(dialog, True)
+
+            if response == Gtk.ResponseType.ACCEPT:
+                selected_file = Gtk.FileChooser.get_filename(dialog)
+                print('guardar en ', selected_file)
+                self.save_to_file(selected_file)
+            else:
+                print('No guardar')
+
+            dialog.destroy()
+        else:
+
+            if(self.textbuffer.get_modified() is True):
+                print('guardar modificacion en ', self.workingFile)
+                self.save_to_file(self.workingFile)
+            else:
+                print('sin modificacion en ', self.workingFile)
+
+    def save_to_file(self, filename):
+        '''
+        Guardado de archivo
+        :param filename:
+        :return:
+        '''
+        start_iter = self.textbuffer.get_start_iter()
+        end_iter = self.textbuffer.get_end_iter()
+        text = self.textbuffer.get_text(start_iter, end_iter, True)
+
+        with open(filename, 'w', encoding="utf-8") as src:
+            # python version 3.x
+            src.write(text)
+            src.close()
+        self.textbuffer.set_modified(False)
+        self.workingFile = filename
+
+    def add_filters(self, dialog):
+        filter_text = Gtk.FileFilter()
+        filter_text.set_name("Text files")
+        filter_text.add_mime_type("text/plain")
+        dialog.add_filter(filter_text)
+
+        filter_py = Gtk.FileFilter()
+        filter_py.set_name("Python files")
+        filter_py.add_mime_type("text/x-python")
+        filter_py.add_pattern(".py")
+        dialog.add_filter(filter_py)
+
+        filter_any = Gtk.FileFilter()
+        filter_any.set_name("Any files")
+        filter_any.add_pattern("*")
+        dialog.add_filter(filter_any)
+
     def Cargar_fichero(self, selected_file):
         filename, file_extension = os.path.splitext(selected_file)
         texto = self.Read_file_to_end(selected_file)
@@ -308,6 +393,8 @@ class MainWindow(Gtk.Window):
         self.textbuffer.new_with_language(self.LANGS['.%s' % 'py'])
         self.textbuffer.set_text(texto)
         self.do_file_type(file_extension)
+        self.workingFile = selected_file
+        self.textbuffer.set_modified(False)
 
     def Read_file_to_end(self, ruta):
         with open(ruta, 'r') as f:
