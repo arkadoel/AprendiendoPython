@@ -18,16 +18,19 @@ despues installar /usr/bin/pip3 install pyobject
 apt install python3-pip python3-gi python3-docutils gir1.2-gtksource-3.0 \
             gir1.2-webkit2-4.0 gir1.2-gtkspell3-3.0
             
-Para GtkSource ver https://github.com/ondratu/formiko/blob/master/formiko/sourceview.py
+Para GtkSource ver 
+https://github.com/ondratu/formiko/blob/master/formiko/sourceview.py
 
 Si la linea from gi.repository import Gtk no es reconocido, Dar alt+enter 
 en Gtk y 'Generate stubs for binary module'
 
 Python Regius es un futuro IDE para python
+De momento es una prueba de diseño y funcionalidades, a modo de experimiento
 '''
 
 import gi
 import os
+from subprocess import *
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkSource', '3.0')
 gi.require_version('GtkSpell', '3.0')
@@ -144,6 +147,7 @@ class MirarHora(threading.Thread):
 class MainWindow(Gtk.Window):
     DEFAULT_WIDTH = 950
     DEFAULT_HEIGHT= 700
+    PYTHON_BIN ='/usr/bin/python3.5'
 
     default_manager = LanguageManager.get_default()
     LANGS = {
@@ -172,6 +176,7 @@ class MainWindow(Gtk.Window):
 
         self.generate_toolbar()
         self.generate_textview()
+        #self.generate_console()
 
     def set_white_chars(self, white_chars):
         '''
@@ -209,6 +214,39 @@ class MainWindow(Gtk.Window):
         if self.textbuffer.get_language() != language:
             self.textbuffer.set_language(language)
 
+    def generate_console(self):
+        scrolled_window1 = Gtk.ScrolledWindow()
+        scrolled_window1.set_border_width(2)
+        self.grid.attach(scrolled_window1, 0, 2, 3, 1)
+        # we scroll only if needed
+        scrolled_window1.set_policy(
+            Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+
+        # a text buffer (stores text)
+        self.bufferConsola = Gtk.TextBuffer()
+
+        # a textview (displays the buffer)
+        self.txtConsola = Gtk.TextView(buffer=self.bufferConsola)
+        # textview is scrolled
+        scrolled_window1.add(self.txtConsola)
+        # wrap the text, if needed, breaking lines in between words
+        self.txtConsola.set_wrap_mode(Gtk.WrapMode.WORD)
+
+        self.bufferConsola.set_text('>')
+
+        self.txtConsola.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse( "#014276" ));
+        tag = self.bufferConsola.create_tag()
+        tag.set_property("foreground",'yellow')
+        start = self.bufferConsola.get_start_iter()
+        end = self.bufferConsola.get_end_iter()
+        self.bufferConsola.apply_tag(tag, start, end)
+        self.fontConsola = FontDescription.from_string('Monospace')
+        self.fontConsola.set_size(8 * 1000)
+        self.txtConsola.override_font(self.fontConsola)
+
+
+
+
     def generate_textview(self):
         scrolledwindow = Gtk.ScrolledWindow()
         scrolledwindow.set_hexpand(True)
@@ -229,7 +267,8 @@ class MainWindow(Gtk.Window):
 
         self.textbuffer = self.textview.get_buffer()
         self.textbuffer.new_with_language(self.LANGS['.%s' % 'py'])
-        self.textbuffer.set_text(EXAMPLE_TEXT)
+        self.textbuffer.set_text('')
+        self.workingFile = None
         self.do_file_type('.py')
         #/usr/share/gtksourceview-3.0/styles/
         #mas temas en https://wiki.gnome.org/Projects/GtkSourceView/StyleSchemes
@@ -270,6 +309,8 @@ class MainWindow(Gtk.Window):
         btnZoomIn.set_icon_name("zoom-in")
         btnZoomOut = Gtk.ToolButton()
         btnZoomOut.set_icon_name("zoom-out")
+        btnCompileRun = Gtk.ToolButton()
+        btnCompileRun.set_icon_name("media-playback-start")
 
         toolbar.insert(btnNew, 1)
         toolbar.insert(btnOpen, 2)
@@ -280,6 +321,8 @@ class MainWindow(Gtk.Window):
         toolbar.insert(Gtk.SeparatorToolItem(), 7)
         toolbar.insert(btnZoomIn, 8)
         toolbar.insert(btnZoomOut, 9)
+        toolbar.insert(Gtk.SeparatorToolItem(), 10)
+        toolbar.insert(btnCompileRun, 11)
 
         btnZoomIn.connect("clicked", self.btnZoomIn_click)
         btnZoomOut.connect("clicked", self.btnZoomOut_click)
@@ -287,6 +330,7 @@ class MainWindow(Gtk.Window):
         btnSave.connect("clicked", self.save_dialog)
         btnUndo.connect("clicked", self.btn_undo_click)
         btnRedo.connect("clicked", self.btn_redo_click)
+        btnCompileRun.connect("clicked", self.btn_compile_run_click)
 
     def key_press_event(self, widget, event):
         keyval_name = Gdk.keyval_name(event.keyval)
@@ -305,6 +349,16 @@ class MainWindow(Gtk.Window):
     def btn_undo_click(self, widget):
         if self.textbuffer.can_undo():
             self.textbuffer.do_undo(self.textbuffer)
+
+    def btn_compile_run_click(self, widget):
+        if self.workingFile is None or self.workingFile is  '':
+            self.save_dialog(widget)
+
+        self.save_to_file(self.workingFile)
+        comando =  self.PYTHON_BIN + " " + self.workingFile
+        print('xfce4-terminal  -x %s' % comando)
+
+        os.system('xfce4-terminal  -x %s -T "PyRegius"' % comando)
 
     def open_dialog_load_file(self, widget):
 
